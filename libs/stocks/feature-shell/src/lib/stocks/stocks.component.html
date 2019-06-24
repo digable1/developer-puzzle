@@ -32,4 +32,12 @@
   <button (click)="fetchQuote()" mat-raised-button>Go</button>
 </form>
 
-<coding-challenge-chart [data$]="quotes$"></coding-challenge-chart>
+<google-chart
+    *ngIf="quotes$ | async as stockData"
+    [type]="'LineChart'"
+    [data]="stockData"
+    [title]="'Stock price'"
+    [columnNames]="['period', 'close']"
+    [width]="600"
+    [height]="400">
+</google-chart>

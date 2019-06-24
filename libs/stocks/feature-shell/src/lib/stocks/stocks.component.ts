@@ -25,7 +25,7 @@ export class StocksComponent implements OnInit {
     { viewValue: 'One month', value: '1m' }
   ];
 
-  constructor(private fb: FormBuilder, private priceQuery: PriceQueryFacade) {
+  constructor(fb: FormBuilder, private priceQuery: PriceQueryFacade) {
     this.stockPickerForm = fb.group({
       symbol: [null, Validators.required],
       period: [null, Validators.required]
