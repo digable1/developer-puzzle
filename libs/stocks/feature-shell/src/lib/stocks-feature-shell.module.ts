@@ -8,7 +8,6 @@ import {
 } from '@angular/material';
 import { RouterModule } from '@angular/router';
 import { GoogleChartsModule } from 'angular-google-charts';
-import { SharedUiChartModule } from '@coding-challenge/shared/ui/chart';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StocksComponent } from './stocks/stocks.component';
 
@@ -23,8 +22,7 @@ import { StocksComponent } from './stocks/stocks.component';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule,
-    SharedUiChartModule
+    MatButtonModule
   ],
   declarations: [StocksComponent]
 })

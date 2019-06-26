@@ -199,35 +199,6 @@
             },
             "schematics": {}
         },
-        "shared-ui-chart": {
-            "root": "libs/shared/ui/chart",
-            "sourceRoot": "libs/shared/ui/chart/src",
-            "projectType": "library",
-            "prefix": "coding-challenge",
-            "architect": {
-                "lint": {
-                    "builder": "@angular-devkit/build-angular:tslint",
-                    "options": {
-                        "tsConfig": [
-                            "libs/shared/ui/chart/tsconfig.lib.json",
-                            "libs/shared/ui/chart/tsconfig.spec.json"
-                        ],
-                        "exclude": [
-                            "**/node_modules/**"
-                        ]
-                    }
-                },
-                "test": {
-                    "builder": "@nrwl/builders:jest",
-                    "options": {
-                        "jestConfig": "libs/shared/ui/chart/jest.config.js",
-                        "tsConfig": "libs/shared/ui/chart/tsconfig.spec.json",
-                        "setupFile": "libs/shared/ui/chart/src/test-setup.ts"
-                    }
-                }
-            },
-            "schematics": {}
-        },
         "stocks-data-access-app-config": {
             "root": "libs/stocks/data-access-app-config",
             "sourceRoot": "libs/stocks/data-access-app-config/src",
