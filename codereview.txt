@@ -1,0 +1,52 @@
+Good things:
+
+1. Decent separation of the parts of the app, such as things relating to state
+2. Decent naming in general
+3. Standard redux pattern implementation via ngrx
+
+Issues:
+
+1. angular.json
+   a. default project should not be 'todo'.  Changed it to 'stocks'
+   b. prefix for most of the projects is 'coding-challenge'.  Should be the name of the project (did not change due to side effects)
+
+2. app.component.ts
+   a. Unit test self-documented a different implementation than what existed.  Changed it.
+
+3. app.component.spec.ts
+   a. Module configuration for unit test was missinv RouterTestingModule.  Fixed.
+
+4. app.component.ts
+   a. Unit test defined a title attribut, but implementation didn't have it.  Fixed.
+
+5. environment.prod.ts, environment.ts
+   a. Added my api key so it would actually work (yes, there's a security concern for plain text private keys - you'd use the vault in the real world)
+
+6. chart.component.html (Note: deprecated, no longer used)
+   a. Fixed the reference, and moved attributes from options to their own attributes, as documentation allows
+   b. The path is not correct for this component:  This hard-codes a stock line graph, and there is no callout in a shared path
+   c. This should actually be removed - there is no extra benefit from this wrapper and more code as opposed to directly referencing Google chart
+
+7. chart.component.spec.ts
+   a. Added missing testbed module configuration attributes
+   b. Added a unit test to check the scaffolding (number of columns, type, etc) - before realizing that this whole component can be unused
+
+8. component.html
+   a. Missing <h1> title line, as called out by the unit test
+
+9. stocks-feature-shell.module.ts
+   a. Refactored: Added GoogleChartsModule to module dependencies as the Chart component is no longer used
+
+10. stocks.component.html
+   a. Refactored: Replaced coding-challenge-line-chart with direct access to google-chart to achieve the same behavior without an extra component
+
+11. stocks.component.spec.ts
+   a. Fixed unit tests so it would run by adding missing dependencies used by both the component and template (material elements, mock default initial state, etc)
+
+12. stocks.component.ts
+   a. Extra unused instance attribute from paramter.  Fixed
+
+13. There are missing unit tests (as called out when you run npm test)
+   a. In general, reducers should be tested for start and end state, as well as possibly to ensure immutability (in case there's a missing spread operator)
+   b. Effects should be unit-tested, especially when they call services (happy path and error condition)
+   c. Key functions such as 'transformPriceQueryResponse' should be unit tested
