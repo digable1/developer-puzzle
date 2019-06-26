@@ -25,3 +25,19 @@ export function transformPriceQueryResponse(
       } as PriceQuery)
   );
 }
+
+export function getCurrentISODate(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear().toString();                                    
+  const mm = (d.getMonth() + 1).toString(); // getMonth() is zero-based         
+  const dd  = d.getDate().toString();             
+  return `${yyyy}-${mm[1] ? mm : "0" + mm[0]}-${dd[1] ? dd : "0" + dd[0]}`;
+}
+
+export function getCacheKey(symbol: string, period: string, isoDateString: string): string {
+  return `${symbol}-${period}-${isoDateString}`
+}
+
+export function getCurrentISODateCacheKey(symbol: string, period: string): string {
+  return getCacheKey(symbol, period, getCurrentISODate());
+}
