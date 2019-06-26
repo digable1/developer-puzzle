@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { PriceQueryFacade } from '@coding-challenge/stocks/data-access-price-query';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'coding-challenge-stocks',
@@ -47,5 +48,11 @@ export class StocksComponent implements OnInit {
     this.stockPickerForm.valueChanges.subscribe(
       () => this.fetchQuote()
     );
+    const symbolControl = this.stockPickerForm.controls['symbol'];
+    symbolControl.valueChanges
+      .pipe(debounceTime(10))
+      .subscribe(
+        () => this.fetchQuote()
+      )
   }
 }
