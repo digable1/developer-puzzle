@@ -25,7 +25,7 @@ export class StocksComponent implements OnInit {
     { viewValue: 'One month', value: '1m' }
   ];
 
-  constructor(private fb: FormBuilder, private priceQuery: PriceQueryFacade) {
+  constructor(fb: FormBuilder, private priceQuery: PriceQueryFacade) {
     this.stockPickerForm = fb.group({
       symbol: [null, Validators.required],
       period: [null, Validators.required]
@@ -33,7 +33,7 @@ export class StocksComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.stockPickerForm.valueChanges.subscribe(this.fetchQuote);
+    this.onChanges();
   }
 
   fetchQuote() {
@@ -41,5 +41,11 @@ export class StocksComponent implements OnInit {
       const { symbol, period } = this.stockPickerForm.value;
       this.priceQuery.fetchQuote(symbol, period);
     }
+  }
+
+  private onChanges(): void {
+    this.stockPickerForm.valueChanges.subscribe(
+      () => this.fetchQuote()
+    );
   }
 }
