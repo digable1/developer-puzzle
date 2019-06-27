@@ -21,9 +21,6 @@
       "@coding-challenge/stocks/feature-shell": [
         "libs/stocks/feature-shell/src/index.ts"
       ],
-      "@coding-challenge/shared/ui/chart": [
-        "libs/shared/ui/chart/src/index.ts"
-      ],
       "@coding-challenge/stocks/data-access-app-config": [
         "libs/stocks/data-access-app-config/src/index.ts"
       ]

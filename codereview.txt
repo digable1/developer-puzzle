@@ -22,7 +22,7 @@ Issues:
 5. environment.prod.ts, environment.ts
    a. Added my api key so it would actually work (yes, there's a security concern for plain text private keys - you'd use the vault in the real world)
 
-6. chart.component.html (Note: deprecated, no longer used)
+6. chart.component.html (Note: Removed, no longer used - but before that happened)
    a. Fixed the reference, and moved attributes from options to their own attributes, as documentation allows
    b. The path is not correct for this component:  This hard-codes a stock line graph, and there is no callout in a shared path
    c. This should actually be removed - there is no extra benefit from this wrapper and more code as opposed to directly referencing Google chart
