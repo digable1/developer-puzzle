@@ -1,7 +1,7 @@
 import { PriceQueryAction, PriceQueryActionTypes } from './price-query.actions';
 import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
 import { PriceQuery, PriceQueryResponse } from './price-query.type';
-import { transformPriceQueryResponse, getCurrentISODateCacheKey } from './price-query-transformer.util';
+import { transformPriceQueryResponse, getCurrentISODateCacheKey, getCacheKey } from './price-query-transformer.util';
 
 export const PRICEQUERY_FEATURE_KEY = 'priceQuery';
 

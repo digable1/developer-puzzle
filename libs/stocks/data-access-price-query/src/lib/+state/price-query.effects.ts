@@ -6,10 +6,11 @@ import {
 } from '@coding-challenge/stocks/data-access-app-config';
 import { Effect } from '@ngrx/effects';
 import { DataPersistence } from '@nrwl/nx';
-import { of } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   FetchPriceQuery,
+  FetchPriceQueryDate,
   PriceQueryActionTypes,
   PriceQueryFetched,
   PriceQueryFetchError,
@@ -32,9 +33,7 @@ export class PriceQueryEffects {
         } else {
           return this.httpClient
           .get<Array<PriceQueryResponse>>(
-            `${this.env.apiURL}/beta/stock/${action.symbol}/chart/${
-              action.period
-            }?token=${this.env.apiKey}`
+            `${this.env.apiURL}/beta/stock/${action.symbol}/chart/${action.period}?token=${this.env.apiKey}`
           )
           .pipe(
             map(resp => new PriceQueryFetched(action.symbol, action.period, resp))
@@ -43,6 +42,47 @@ export class PriceQueryEffects {
       },
 
       onError: (action: FetchPriceQuery, error) => {
+        return new PriceQueryFetchError(error);
+      }
+    }
+  );
+
+  @Effect() loadPriceQueryDate$ = this.dataPersistence.fetch(
+    PriceQueryActionTypes.FetchPriceQueryDate,
+    {
+      run: (action: FetchPriceQueryDate, state: PriceQueryPartialState) => {
+        const maxPeriod = 'max';
+        const cachedPriceQuery = state[PRICEQUERY_FEATURE_KEY].priceQueryCache[getCurrentISODateCacheKey(action.symbol, maxPeriod)];
+        const dateWindow: (startDate: Date, endDate: Date, resp: Array<PriceQueryResponse>) =>
+            Array<PriceQueryResponse> = (startDate: Date, endDate: Date, resp: Array<PriceQueryResponse>) => {
+          const windowQuery: Array<PriceQueryResponse> = [];
+          const startTime = new Date(startDate).getTime();
+          const endTime = new Date(endDate).getTime();
+          resp.forEach((response) => {
+            const queryTime = new Date(response.date).getTime();
+            if (queryTime >= startTime && queryTime <= endTime) {
+              windowQuery.push(response);
+            }
+          });
+          return windowQuery;
+        };
+
+        if (cachedPriceQuery) {
+          return of(new PriceQueryCached(dateWindow(action.startdate, action.enddate, cachedPriceQuery)));
+        } else {
+          return this.httpClient
+          .get<Array<PriceQueryResponse>>(
+            `${this.env.apiURL}/beta/stock/${action.symbol}/chart/${maxPeriod}?token=${this.env.apiKey}`
+          )
+          .pipe(
+            map(resp => {
+              return new PriceQueryFetched(action.symbol, action.period, dateWindow(action.startdate, action.enddate, resp))
+            })
+          );
+        }
+      },
+
+      onError: (action: FetchPriceQueryDate, error) => {
         return new PriceQueryFetchError(error);
       }
     }

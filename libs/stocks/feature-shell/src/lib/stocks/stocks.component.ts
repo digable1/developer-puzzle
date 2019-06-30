@@ -30,7 +30,7 @@ export class StocksComponent implements OnInit {
     { viewValue: 'Six months', value: '6m' },
     { viewValue: 'Three months', value: '3m' },
     { viewValue: 'One month', value: '1m' },
-    { viewValue: 'Custom date range', value: 'custom' }
+    { viewValue: 'Custom date range', value: 'date' }
   ];
 
   private static validateStartEndDate(datePickerForm: FormGroup): ValidationErrors | null {
@@ -100,7 +100,7 @@ export class StocksComponent implements OnInit {
   }
 
   checkCustomDate(): void {
-    this.isCustomDate = this.stockPickerForm.controls['period'].value === 'custom';
+    this.isCustomDate = this.stockPickerForm.controls['period'].value === 'date';
   }
 
   private onChanges(): void {

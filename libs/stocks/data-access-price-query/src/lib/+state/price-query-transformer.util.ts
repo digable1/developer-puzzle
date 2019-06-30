@@ -2,6 +2,8 @@ import { PriceQueryResponse, PriceQuery } from './price-query.type';
 import { map, pick } from 'lodash-es';
 import { parse } from 'date-fns';
 
+const dayInMilli = (24 * 60 * 60 * 1000);
+
 export function transformPriceQueryResponse(
   response: PriceQueryResponse[]
 ): PriceQuery[] {
@@ -26,12 +28,15 @@ export function transformPriceQueryResponse(
   );
 }
 
-export function getCurrentISODate(): string {
-  const d = new Date();
-  const yyyy = d.getFullYear().toString();                                    
-  const mm = (d.getMonth() + 1).toString(); // getMonth() is zero-based         
-  const dd  = d.getDate().toString();             
+export function getISODate(d: Date): string {
+  const yyyy = d.getFullYear().toString();
+  const mm = (d.getMonth() + 1).toString(); // getMonth() is zero-based
+  const dd  = d.getDate().toString();
   return `${yyyy}-${mm[1] ? mm : "0" + mm[0]}-${dd[1] ? dd : "0" + dd[0]}`;
+}
+
+export function getCurrentISODate(): string {
+  return getISODate(new Date());
 }
 
 export function getCacheKey(symbol: string, period: string, isoDateString: string): string {
