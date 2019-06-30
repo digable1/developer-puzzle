@@ -4,7 +4,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldControl } from '@angular/material';
+import { MatFormFieldControl,
+  MatDatepickerModule,
+  MatNativeDateModule } from '@angular/material';
 import { FormBuilder } from '@angular/forms';
 
 import { provideMockStore } from '@ngrx/store/testing';
@@ -28,6 +30,8 @@ describe('StocksComponent', () => {
         NoopAnimationsModule,
         ReactiveFormsModule,
         MatFormFieldModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
         MatInputModule,
         MatSelectModule,
         GoogleChartsModule

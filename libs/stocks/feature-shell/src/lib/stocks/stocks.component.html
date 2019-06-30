@@ -19,7 +19,7 @@
 
   <mat-form-field>
     <mat-label>Favorite time period</mat-label>
-    <mat-select formControlName="period">
+    <mat-select formControlName="period" (selectionChange)="checkCustomDate()">
       <mat-option
         *ngFor="let timePeriod of timePeriods"
         [value]="timePeriod.value"
@@ -28,6 +28,26 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
+
+
+  <mat-form-field *ngIf="isCustomDate">
+    <mat-label>Select start date</mat-label>
+    <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="startdatepicker"
+      [formControl]="datePickerForm.get('startdate')"
+      placeholder="end date (up to 30 days back)">
+    <mat-datepicker-toggle matSuffix [for]="startdatepicker"></mat-datepicker-toggle>
+    <mat-datepicker #startdatepicker></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field *ngIf="isCustomDate">
+    <mat-label>Select end date</mat-label>
+    <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="enddatepicker"
+      [formControl]="datePickerForm.get('enddate')"
+      placeholder="start date (up to today)">
+    <mat-datepicker-toggle matSuffix [for]="enddatepicker"></mat-datepicker-toggle>
+    <mat-datepicker #enddatepicker></mat-datepicker>
+  </mat-form-field>
+
 </form>
 
 <google-chart

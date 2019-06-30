@@ -62,6 +62,24 @@ export function priceQueryReducer(
         selectedSymbol: action.symbol
       };
     }
+    case PriceQueryActionTypes.PriceQueryFetchError: {
+      return priceQueryAdapter.addAll(
+        [{
+          date: '',
+          open: 0,
+          close: 0,
+          high: 0,
+          low: 0,
+          volume: 0,
+          change: 0,
+          changePercent: 0,
+          label: '',
+          changeOverTime: 0,
+          dateNumeric: 0
+        }],
+        state
+      );
+    }
   }
   return state;
 }
