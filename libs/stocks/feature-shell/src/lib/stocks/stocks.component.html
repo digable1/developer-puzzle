@@ -32,18 +32,18 @@
 
   <mat-form-field *ngIf="isCustomDate">
     <mat-label>Select start date</mat-label>
-    <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="startdatepicker"
+    <input matInput [min]="minDate" [max]="datePickerForm.get('enddate')" [matDatepicker]="startdatepicker"
       [formControl]="datePickerForm.get('startdate')"
-      placeholder="end date (up to 30 days back)">
+      placeholder="start date">
     <mat-datepicker-toggle matSuffix [for]="startdatepicker"></mat-datepicker-toggle>
     <mat-datepicker #startdatepicker></mat-datepicker>
   </mat-form-field>
 
   <mat-form-field *ngIf="isCustomDate">
     <mat-label>Select end date</mat-label>
-    <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="enddatepicker"
+    <input matInput [min]="datePickerForm.get('startdate')" [max]="maxDate" [matDatepicker]="enddatepicker"
       [formControl]="datePickerForm.get('enddate')"
-      placeholder="start date (up to today)">
+      placeholder="end date">
     <mat-datepicker-toggle matSuffix [for]="enddatepicker"></mat-datepicker-toggle>
     <mat-datepicker #enddatepicker></mat-datepicker>
   </mat-form-field>

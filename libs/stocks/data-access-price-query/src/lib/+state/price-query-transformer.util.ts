@@ -2,7 +2,37 @@ import { PriceQueryResponse, PriceQuery } from './price-query.type';
 import { map, pick } from 'lodash-es';
 import { parse } from 'date-fns';
 
-const dayInMilli = (24 * 60 * 60 * 1000);
+export const priceQueryResponseBlank: PriceQueryResponse = {
+  date: '',
+  open: 0,
+  close: 0,
+  high: 0,
+  low: 0,
+  volume: 0,
+  uOpen: 0,
+  uClose: 0,
+  uHigh: 0,
+  uLow: 0,
+  uVolume: 0,
+  change: 0,
+  changePercent: 0,
+  label: '',
+  changeOverTime: 0
+};
+
+export const priceQueryBlank: PriceQuery = {
+  date: '',
+  open: 0,
+  close: 0,
+  high: 0,
+  low: 0,
+  volume: 0,
+  change: 0,
+  changePercent: 0,
+  label: '',
+  changeOverTime: 0,
+  dateNumeric: 0
+};
 
 export function transformPriceQueryResponse(
   response: PriceQueryResponse[]

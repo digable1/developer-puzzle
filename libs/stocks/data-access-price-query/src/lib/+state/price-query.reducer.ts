@@ -1,7 +1,7 @@
 import { PriceQueryAction, PriceQueryActionTypes } from './price-query.actions';
 import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
 import { PriceQuery, PriceQueryResponse } from './price-query.type';
-import { transformPriceQueryResponse, getCurrentISODateCacheKey, getCacheKey } from './price-query-transformer.util';
+import { transformPriceQueryResponse, getCurrentISODateCacheKey, priceQueryBlank } from './price-query-transformer.util';
 
 export const PRICEQUERY_FEATURE_KEY = 'priceQuery';
 
@@ -50,6 +50,18 @@ export function priceQueryReducer(
         stateWithCache
       );
     }
+    case PriceQueryActionTypes.PriceQueryDateFetched: {
+      const stateWithCache = {
+        ...state,
+        priceQueryCache: addQueryCache(action.symbol, action.period, action.queryResults, state.priceQueryCache)
+      }
+
+      const returnedState = priceQueryAdapter.addAll(
+        transformPriceQueryResponse(action.dateResults),
+        stateWithCache
+      );
+      return returnedState;
+    }
     case PriceQueryActionTypes.PriceQueryCached: {
       return priceQueryAdapter.addAll(
         transformPriceQueryResponse(action.queryResults),
@@ -64,19 +76,7 @@ export function priceQueryReducer(
     }
     case PriceQueryActionTypes.PriceQueryFetchError: {
       return priceQueryAdapter.addAll(
-        [{
-          date: '',
-          open: 0,
-          close: 0,
-          high: 0,
-          low: 0,
-          volume: 0,
-          change: 0,
-          changePercent: 0,
-          label: '',
-          changeOverTime: 0,
-          dateNumeric: 0
-        }],
+        [priceQueryBlank],
         state
       );
     }
@@ -86,6 +86,7 @@ export function priceQueryReducer(
 
 function addQueryCache(symbol: string, period: string, queryResults: Array<PriceQueryResponse>, queryCache: PriceQueryResponseCache): PriceQueryResponseCache {
   const newQueryCache: PriceQueryResponseCache = Object.assign({}, queryCache);
+  const finalPeriod = period === 'date' ? 'max' : period;
 
   if (queryResults && queryResults.length > 0) {
     const cacheKey = getCurrentISODateCacheKey(symbol, period);

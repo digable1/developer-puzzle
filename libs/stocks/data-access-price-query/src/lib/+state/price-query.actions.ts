@@ -6,6 +6,7 @@ export enum PriceQueryActionTypes {
   FetchPriceQuery = 'priceQuery.fetch',
   FetchPriceQueryDate = 'priceQuery.fetchDate',
   PriceQueryFetched = 'priceQuery.fetched',
+  PriceQueryDateFetched = 'priceQuery.dateFetched',
   PriceQueryCached = 'priceQuery.cached',
   PriceQueryFetchError = 'priceQuery.error'
 }
@@ -30,6 +31,11 @@ export class PriceQueryFetched implements Action {
   constructor(public symbol: string, public period: string, public queryResults: PriceQueryResponse[]) {}
 }
 
+export class PriceQueryDateFetched implements Action {
+  readonly type = PriceQueryActionTypes.PriceQueryDateFetched;
+  constructor(public symbol: string, public period: string, public queryResults: PriceQueryResponse[], public dateResults: PriceQueryResponse[]) {}
+}
+
 export class PriceQueryCached implements Action {
   readonly type = PriceQueryActionTypes.PriceQueryCached;
   constructor(public queryResults: PriceQueryResponse[]) {}
@@ -43,6 +49,7 @@ export class SelectSymbol implements Action {
 export type PriceQueryAction =
   | FetchPriceQuery
   | PriceQueryFetched
+  | PriceQueryDateFetched
   | PriceQueryCached
   | PriceQueryFetchError
   | SelectSymbol;

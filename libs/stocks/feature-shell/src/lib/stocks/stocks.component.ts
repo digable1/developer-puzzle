@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { PriceQueryFacade } from '@coding-challenge/stocks/data-access-price-query';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 const dayInMilli = (24 * 60 * 60 * 1000);
-const minimumTime = (30 * dayInMilli);
 
 @Component({
   selector: 'coding-challenge-stocks',
@@ -15,9 +14,8 @@ export class StocksComponent implements OnInit {
   stockPickerForm: FormGroup;
   datePickerForm: FormGroup;
   isCustomDate = false;
-  nowDate = Date.now();
-  minDate = new Date((this.nowDate - minimumTime) / dayInMilli * dayInMilli);
-  maxDate = new Date(this.nowDate / dayInMilli * dayInMilli);
+  maxDate = new Date(Date.now() / dayInMilli * dayInMilli);
+  minDate = new Date(0);
 
   quotes$ = this.priceQuery.priceQueries$;
 
@@ -44,19 +42,19 @@ export class StocksComponent implements OnInit {
     }
 
     setTimeout(() => {
-      const nowDay = Date.now() / dayInMilli;
-      const minimumDay = (nowDay - minimumTime) / dayInMilli;
+      const nowTime = Date.now() / dayInMilli * dayInMilli;
+      const minimumTime = new Date(0).getTime();
   
-      let startTime = startDateDate ? startDateDate.getTime() / dayInMilli: minimumDay;
-      let endTime = endDateDate ? endDateDate.getTime() / dayInMilli : nowDay;
-      const invalidStartRange = (startTime < minimumDay || startTime > nowDay);
-      const invalidEndRange = (endTime < startTime || endTime < minimumDay || endTime > nowDay);
+      let startTime = startDateDate ? startDateDate.getTime() / dayInMilli * dayInMilli: minimumTime;
+      let endTime = endDateDate ? endDateDate.getTime() / dayInMilli * dayInMilli : nowTime;
+      const invalidStartRange = (startTime > endTime || startTime < minimumTime || startTime > nowTime);
+      const invalidEndRange = (endTime < startTime || endTime < minimumTime || endTime > nowTime);
   
-      startTime = startTime < minimumDay ? minimumDay : startTime;
-      startTime = startTime > nowDay ? nowDay : startTime;
+      startTime = startTime < minimumTime ? minimumTime : startTime;
+      startTime = startTime > nowTime ? nowTime : startTime;
   
-      endTime = endTime > nowDay ? nowDay : endTime;
-      endTime = endTime < minimumDay ? minimumDay : endTime;
+      endTime = endTime > nowTime ? nowTime : endTime;
+      endTime = endTime < minimumTime ? minimumTime : endTime;
   
   
       if (invalidStartRange) {
@@ -76,14 +74,17 @@ export class StocksComponent implements OnInit {
 
 
   constructor(fb: FormBuilder, private priceQuery: PriceQueryFacade) {
-    const now = new Date(Date.now() / dayInMilli * dayInMilli);
     this.stockPickerForm = fb.group({
       symbol: [null, Validators.required],
       period: [null, Validators.required]
     });
+    const now = new Date(Date.now() / dayInMilli * dayInMilli);
+    const noDate = new Date(0);
     this.datePickerForm = fb.group({
-      startdate: [new Date((now.getTime() - minimumTime) / dayInMilli * dayInMilli), this.startDateValidator],
-      enddate: [now, this.endDateValidator]
+      startdate: [now, this.startDateValidator],
+      enddate: [now, this.endDateValidator],
+      previousstartdate: [noDate],
+      previousenddate: [noDate]
     })
   }
 
@@ -100,6 +101,7 @@ export class StocksComponent implements OnInit {
   }
 
   checkCustomDate(): void {
+    this.maxDate = new Date(Date.now() / dayInMilli * dayInMilli);
     this.isCustomDate = this.stockPickerForm.controls['period'].value === 'date';
   }
 
@@ -113,12 +115,33 @@ export class StocksComponent implements OnInit {
           }
         }
       );
+    this.datePickerForm.valueChanges
+      .subscribe(
+        (value) => {
+          if (value.startdate instanceof Date && value.enddate instanceof Date) {
+            const starttime = value.startdate as Date;
+            const enddate = value.enddate as Date;
+            const previousstartdate = value.previousstartdate as Date;
+            const previousenddate = value.previousenddate as Date;
+
+            if (starttime.getTime() !== previousstartdate.getTime() || enddate.getTime() !== previousenddate.getTime()) {
+              this.datePickerForm.patchValue({
+                previousstartdate: starttime,
+                previousenddate: enddate
+              });
+              this.fetchQuote();
+            }
+          }
+        }
+      )
   }
 
-  private startDateValidator(control: AbstractControl): ValidationErrors | null {
+  private startDateValidator: (control: AbstractControl) => ValidationErrors | null = (control: AbstractControl) => {
+    this.maxDate = new Date(Date.now() / dayInMilli * dayInMilli);
     return StocksComponent.validateStartEndDate(control.parent as FormGroup);
   }
-  private endDateValidator(control: AbstractControl): ValidationErrors | null {
+  private endDateValidator: (control: AbstractControl) => ValidationErrors | null = (control: AbstractControl) => {
+    this.maxDate = new Date(Date.now() / dayInMilli * dayInMilli);
     return StocksComponent.validateStartEndDate(control.parent as FormGroup);
   }
 }

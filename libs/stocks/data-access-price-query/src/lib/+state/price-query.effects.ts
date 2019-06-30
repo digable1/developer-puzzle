@@ -6,19 +6,22 @@ import {
 } from '@coding-challenge/stocks/data-access-app-config';
 import { Effect } from '@ngrx/effects';
 import { DataPersistence } from '@nrwl/nx';
-import { Observable, of, forkJoin } from 'rxjs';
+import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   FetchPriceQuery,
   FetchPriceQueryDate,
   PriceQueryActionTypes,
   PriceQueryFetched,
+  PriceQueryDateFetched,
   PriceQueryFetchError,
   PriceQueryCached
 } from './price-query.actions';
 import { PriceQueryPartialState, PRICEQUERY_FEATURE_KEY } from './price-query.reducer';
 import { PriceQueryResponse } from './price-query.type';
-import { getCurrentISODateCacheKey } from './price-query-transformer.util';
+import { getCurrentISODateCacheKey, priceQueryResponseBlank } from './price-query-transformer.util';
+
+const dayInMilli = (24 * 60 * 60 * 1000);
 
 @Injectable()
 export class PriceQueryEffects {
@@ -53,17 +56,20 @@ export class PriceQueryEffects {
       run: (action: FetchPriceQueryDate, state: PriceQueryPartialState) => {
         const maxPeriod = 'max';
         const cachedPriceQuery = state[PRICEQUERY_FEATURE_KEY].priceQueryCache[getCurrentISODateCacheKey(action.symbol, maxPeriod)];
-        const dateWindow: (startDate: Date, endDate: Date, resp: Array<PriceQueryResponse>) =>
-            Array<PriceQueryResponse> = (startDate: Date, endDate: Date, resp: Array<PriceQueryResponse>) => {
+
+        const dateWindow = (startDate: Date, endDate: Date, resp: Array<PriceQueryResponse>) => {
           const windowQuery: Array<PriceQueryResponse> = [];
-          const startTime = new Date(startDate).getTime();
-          const endTime = new Date(endDate).getTime();
+          const startTime = new Date(startDate).getTime() / dayInMilli * dayInMilli;
+          const endTime = (new Date(endDate).getTime() / dayInMilli * dayInMilli) + (dayInMilli - 1);
           resp.forEach((response) => {
-            const queryTime = new Date(response.date).getTime();
-            if (queryTime >= startTime && queryTime <= endTime) {
+            const queryTime = (new Date(response.date).getTime() / dayInMilli * dayInMilli) + (dayInMilli / 2);
+            if (queryTime > startTime && queryTime <= endTime) {
               windowQuery.push(response);
             }
           });
+          if (windowQuery.length < 1) {
+            windowQuery.push(priceQueryResponseBlank);
+          }
           return windowQuery;
         };
 
@@ -75,9 +81,7 @@ export class PriceQueryEffects {
             `${this.env.apiURL}/beta/stock/${action.symbol}/chart/${maxPeriod}?token=${this.env.apiKey}`
           )
           .pipe(
-            map(resp => {
-              return new PriceQueryFetched(action.symbol, action.period, dateWindow(action.startdate, action.enddate, resp))
-            })
+            map(resp => new PriceQueryDateFetched(action.symbol, maxPeriod, resp, dateWindow(action.startdate, action.enddate, resp))),
           );
         }
       },
