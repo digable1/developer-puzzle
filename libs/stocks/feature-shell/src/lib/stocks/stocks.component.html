@@ -34,7 +34,8 @@
     <mat-label>Select start date</mat-label>
     <input matInput [min]="minDate" [max]="datePickerForm.get('enddate')" [matDatepicker]="startdatepicker"
       [formControl]="datePickerForm.get('startdate')"
-      placeholder="start date">
+      placeholder="start date"
+      (dateInput)="validateDateInput($event)" (dateChange)="validateDateChange($event)">
     <mat-datepicker-toggle matSuffix [for]="startdatepicker"></mat-datepicker-toggle>
     <mat-datepicker #startdatepicker></mat-datepicker>
   </mat-form-field>
@@ -43,7 +44,8 @@
     <mat-label>Select end date</mat-label>
     <input matInput [min]="datePickerForm.get('startdate')" [max]="maxDate" [matDatepicker]="enddatepicker"
       [formControl]="datePickerForm.get('enddate')"
-      placeholder="end date">
+      placeholder="end date"
+      (dateInput)="validateDateInput($event)" (dateChange)="validateDateChange($event)">
     <mat-datepicker-toggle matSuffix [for]="enddatepicker"></mat-datepicker-toggle>
     <mat-datepicker #enddatepicker></mat-datepicker>
   </mat-form-field>

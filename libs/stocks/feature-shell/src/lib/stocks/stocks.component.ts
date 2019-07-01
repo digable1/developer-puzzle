@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {MatDatepickerInputEvent} from '@angular/material/datepicker';
 import { PriceQueryFacade } from '@coding-challenge/stocks/data-access-price-query';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 
 const dayInMilli = (24 * 60 * 60 * 1000);
 
@@ -41,33 +42,35 @@ export class StocksComponent implements OnInit {
       return null;
     }
 
-    setTimeout(() => {
-      const nowTime = Date.now() / dayInMilli * dayInMilli;
-      const minimumTime = new Date(0).getTime();
+    const nowTime = Date.now() / dayInMilli * dayInMilli;
+    const minimumTime = new Date(0).getTime();
+
+    let startTime = startDateDate ? startDateDate.getTime() / dayInMilli * dayInMilli: minimumTime;
+    let endTime = endDateDate ? endDateDate.getTime() / dayInMilli * dayInMilli : nowTime;
+    const startTimeOutsideRange = startTime < minimumTime;
+    startTime = startTimeOutsideRange ? minimumTime : startTime;
+    const endTimeOutsideRange = endTime > nowTime;
+    endTime = endTimeOutsideRange ? nowTime : endTime;
   
-      let startTime = startDateDate ? startDateDate.getTime() / dayInMilli * dayInMilli: minimumTime;
-      let endTime = endDateDate ? endDateDate.getTime() / dayInMilli * dayInMilli : nowTime;
-      const invalidStartRange = (startTime > endTime || startTime < minimumTime || startTime > nowTime);
-      const invalidEndRange = (endTime < startTime || endTime < minimumTime || endTime > nowTime);
-  
-      startTime = startTime < minimumTime ? minimumTime : startTime;
-      startTime = startTime > nowTime ? nowTime : startTime;
-  
-      endTime = endTime > nowTime ? nowTime : endTime;
-      endTime = endTime < minimumTime ? minimumTime : endTime;
-  
-  
-      if (invalidStartRange) {
-        datePickerForm.patchValue({
-          startdate: new Date(startTime * dayInMilli)
-        });
-      }
-      if (invalidEndRange) {
-        datePickerForm.patchValue({
-          enddate: new Date(startTime * dayInMilli)
-        });
-      }
-    }, 1000);
+    if (startTimeOutsideRange) {
+      datePickerForm.patchValue({
+        startdate: new Date(startTime)
+      });
+    } else if (endTimeOutsideRange) {
+      datePickerForm.patchValue({
+        enddate: new Date(endTime)
+      });
+    }
+
+    if (startTime > endTime) {
+      datePickerForm.patchValue({
+        startdate: new Date(endTime),
+      });
+    } else if (endTime < startTime) {
+      datePickerForm.patchValue({
+        enddate: new Date(startTime),
+      });
+    }
 
     return null;
   }
@@ -79,12 +82,9 @@ export class StocksComponent implements OnInit {
       period: [null, Validators.required]
     });
     const now = new Date(Date.now() / dayInMilli * dayInMilli);
-    const noDate = new Date(0);
     this.datePickerForm = fb.group({
-      startdate: [now, this.startDateValidator],
-      enddate: [now, this.endDateValidator],
-      previousstartdate: [noDate],
-      previousenddate: [noDate]
+      startdate: [now],
+      enddate: [now]
     })
   }
 
@@ -105,6 +105,20 @@ export class StocksComponent implements OnInit {
     this.isCustomDate = this.stockPickerForm.controls['period'].value === 'date';
   }
 
+  validateDateInput(event: MatDatepickerInputEvent<Date>): void {
+    this.maxDate = new Date(Date.now() / dayInMilli * dayInMilli);
+    setTimeout(() => {
+      StocksComponent.validateStartEndDate(this.datePickerForm);
+      this.fetchQuote();
+    }, 2000);
+  }
+
+  validateDateChange(event: MatDatepickerInputEvent<Date>): void {
+    this.maxDate = new Date(Date.now() / dayInMilli * dayInMilli);
+    StocksComponent.validateStartEndDate(this.datePickerForm);
+    this.fetchQuote();
+  }
+
   private onChanges(): void {
     this.stockPickerForm.valueChanges
       .pipe(debounceTime(10))
@@ -115,25 +129,6 @@ export class StocksComponent implements OnInit {
           }
         }
       );
-    this.datePickerForm.valueChanges
-      .subscribe(
-        (value) => {
-          if (value.startdate instanceof Date && value.enddate instanceof Date) {
-            const starttime = value.startdate as Date;
-            const enddate = value.enddate as Date;
-            const previousstartdate = value.previousstartdate as Date;
-            const previousenddate = value.previousenddate as Date;
-
-            if (starttime.getTime() !== previousstartdate.getTime() || enddate.getTime() !== previousenddate.getTime()) {
-              this.datePickerForm.patchValue({
-                previousstartdate: starttime,
-                previousenddate: enddate
-              });
-              this.fetchQuote();
-            }
-          }
-        }
-      )
   }
 
   private startDateValidator: (control: AbstractControl) => ValidationErrors | null = (control: AbstractControl) => {
